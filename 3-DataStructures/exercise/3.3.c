@@ -6,126 +6,133 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int *initialize(int max_size)
+typedef struct
 {
-    int *dynamic_arr = malloc(max_size * sizeof(int));
-    if (dynamic_arr == NULL)
+    int size;
+    int capacity;
+    int *entries;
+} DynamicArray;
+
+DynamicArray *initialize(int capacity)
+{
+    DynamicArray *array = malloc(sizeof(DynamicArray));
+    if (array == NULL)
     {
         fprintf(stderr, "Memory allocation failed\n");
         exit(EXIT_FAILURE);
     }
-    return dynamic_arr;
-}
 
-void push(int **dynamic_arr, int *size, int *max_size, int value)
-{
-    if (*size == *max_size)
+    array->entries = malloc(capacity * sizeof(int));
+    if (array->entries == NULL)
     {
-        int *new_array = initialize(*max_size * 2);
-        *max_size *= 2;
-
-        for (int i = 0; i < *size; i++)
-        {
-            new_array[i] = (*dynamic_arr)[i];
-        }
-
-        free(*dynamic_arr);
-        *dynamic_arr = new_array;
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
     }
 
-    (*dynamic_arr)[*size] = value;
-    (*size)++;
+    array->capacity = capacity;
+    array->size = 0;
+    return array;
 }
 
-int pop1(int **dynamic_arr, int *size, int *max_size)
+void push(DynamicArray *array, int value)
 {
-    if (*size == 0)
+    if (array->size == array->capacity)
+    {
+        array->capacity *= 2;
+        array->entries = realloc(array->entries, array->capacity * sizeof(int));
+        if (array->entries == NULL)
+        {
+            fprintf(stderr, "Memory allocation failed\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    array->entries[array->size] = value;
+    array->size++;
+}
+
+int pop1(DynamicArray *array)
+{
+    if (array->size == 0)
     {
         fprintf(stderr, "Array is empty\n");
         exit(EXIT_FAILURE);
     }
 
-    int value = (*dynamic_arr)[*size - 1];
-    (*size)--;
+    int value = array->entries[array->size - 1];
+    array->size--;
 
-    if (*size == *max_size / 2)
+    if (array->size == array->capacity / 2)
     {
-        int *new_array = initialize(*max_size / 2);
-        *max_size /= 2;
-
-        for (int i = 0; i < *size; i++)
+        array->capacity /= 2;
+        array->entries = realloc(array->entries, array->capacity * sizeof(int));
+        if (array->entries == NULL)
         {
-            new_array[i] = (*dynamic_arr)[i];
+            fprintf(stderr, "Memory allocation failed\n");
+            exit(EXIT_FAILURE);
         }
-
-        free(*dynamic_arr);
-        *dynamic_arr = new_array;
     }
 
     return value;
 }
 
-int pop2(int **dynamic_arr, int *size, int *max_size)
+int pop2(DynamicArray *array)
 {
-    if (*size == 0)
+    if (array->size == 0)
     {
         fprintf(stderr, "Array is empty\n");
         exit(EXIT_FAILURE);
     }
 
-    int value = (*dynamic_arr)[*size - 1];
-    (*size)--;
+    int value = array->entries[array->size - 1];
+    array->size--;
 
-    if (*size == *max_size / 4)
+    if (array->size == array->capacity / 4)
     {
-        int *new_array = initialize(*max_size / 2);
-        *max_size /= 2;
-
-        for (int i = 0; i < *size; i++)
+        array->capacity /= 2;
+        array->entries = realloc(array->entries, array->capacity * sizeof(int));
+        if (array->entries == NULL)
         {
-            new_array[i] = (*dynamic_arr)[i];
+            fprintf(stderr, "Memory allocation failed\n");
+            exit(EXIT_FAILURE);
         }
-
-        free(*dynamic_arr);
-        *dynamic_arr = new_array;
     }
 
     return value;
 }
 
-void print(int *dynamic_array, int size, int max_size)
+void print(DynamicArray *array)
 {
-    printf("size / max_size: %d / %d\n", size, max_size);
-    for (int i = 0; i < size; i++)
+    printf("size / capacity: %d / %d\n", array->size, array->capacity);
+    for (int i = 0; i < array->size; i++)
     {
-        printf("%d ", dynamic_array[i]);
+        printf("%d ", array->entries[i]);
     }
     printf("\n");
 }
 
 int main()
 {
-    int max_size = 1;
-    int size = 0;
-    int *dynamic_arr = initialize(max_size);
+    DynamicArray *array = initialize(1);
 
     for (int i = 0; i < 10; i++)
     {
-        push(&dynamic_arr, &size, &max_size, i);
+        push(array, i);
     }
-    print(dynamic_arr, size, max_size);
+    print(array);
 
     for (int i = 0; i < 2; i++)
     {
-        pop1(&dynamic_arr, &size, &max_size);
+        pop1(array);
     }
-    print(dynamic_arr, size, max_size);
+    print(array);
 
     for (int i = 0; i < 6; i++)
     {
-        pop2(&dynamic_arr, &size, &max_size);
+        pop2(array);
     }
-    print(dynamic_arr, size, max_size);
+    print(array);
 
-    free(dynamic_arr);
+    free(array->entries);
+    free(array);
 }
