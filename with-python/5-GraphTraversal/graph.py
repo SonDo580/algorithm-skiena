@@ -2,7 +2,9 @@ from collections import deque
 
 
 class Graph:
-    """Represent the graph with an adjacency list"""
+    """
+    Represent the graph with an adjacency list.
+    """
 
     def __init__(self, directed=False):
         self.graph = {}
@@ -35,7 +37,7 @@ class Graph:
         # processed: all edges connected to vertex have been checked
         processed = {vertex: False for vertex in self.graph}
 
-        # discovery relation (can be used for path construction)
+        # discovery relation
         parent = {vertex: None for vertex in self.graph}
 
         queue = deque([start])
@@ -61,17 +63,34 @@ class Graph:
             if process_vertex_late:
                 process_vertex_late(v)
 
+        return parent  # used for path construction
+
+    def count_edges(self):
+        edge_count = {"count": 0}
+
+        def count_edges(v, y):
+            edge_count["count"] += 1
+
+        self.bfs(start=1, process_edge=count_edges)
+        return edge_count["count"]
+
+    def find_shortest_path(self, start, end):
+        # - vertices are discovered in order of increasing distance from the root
+        # -> the unique tree path from root to node x uses the smallest number of edges
+        # -> this is also the shortest path if the graph is unweighted
+        parent = self.bfs(start)
+        path = []
+        current = end
+
+        while current is not None:
+            path.append(current)
+            current = parent[current]
+
+        path.reverse()
+        return path
+
 
 # Usage:
-def count_edges(graph):
-    edge_count = {"count": 0}
-
-    def count_edges(v, y):
-        edge_count["count"] += 1
-
-    graph.bfs(start=1, process_edge=count_edges)
-    return edge_count['count']
-                
 def main():
     g = Graph()
     g.add_edge(1, 2)
@@ -81,15 +100,16 @@ def main():
     g.add_edge(4, 5)
     g.print()
 
-    print("...Starting BFS...")
+    print("\n...Starting BFS...")
     g.bfs(
         start=1,
         process_vertex_early=lambda v: print(f"Processed vertex early: {v}"),
         process_edge=lambda v, y: print(f"Processed edge ({v} -> {y})"),
     )
-    print("...End BFS...")
+    print("...End BFS...\n")
 
-    print(f"Number of edges: {count_edges(g)}")
+    print(f"Number of edges: {g.count_edges()}\n")
+    print(f"Shortest path from 1 to 4: {g.find_shortest_path(1, 4)}\n")
 
 
 if __name__ == "__main__":
