@@ -65,81 +65,6 @@ class Graph:
 
         return parent  # used for path construction
 
-    def count_edges(self):
-        edge_count = {"count": 0}
-
-        def process_edge(v, y):
-            edge_count["count"] += 1
-
-        self.bfs(start=1, process_edge=process_edge)
-        return edge_count["count"]
-
-    def find_shortest_path(self, start, end):
-        # vertices are discovered in order of increasing distance from the root
-        # -> the unique tree path from root to node x uses the smallest number of edges
-        # -> this is also the shortest path if the graph is unweighted
-        parent = self.bfs(start)
-        path = []
-        current = end
-
-        while current is not None:
-            path.append(current)
-            current = parent[current]
-
-        path.reverse()
-        return path
-
-    def connected_components(self):
-        # - there's a path between any pair of vertices in a connected component
-        # - different connected components are disjoint
-
-        discovered = {vertex: False for vertex in self.graph}
-        component_number = 0
-        components = []
-
-        def process_vertex_early(v):
-            components[-1].append(v)
-            discovered[v] = True
-
-        for vertex in self.graph:
-            if not discovered[vertex]:
-                component_number += 1
-                components.append([])
-                self.bfs(vertex, process_vertex_early=process_vertex_early)
-                print(f"Component {component_number}: {components[-1]}")
-
-        return components
-
-    def two_color(self):
-        # a graph is bipartite if it can be colored using only 2 colors
-        # such that no edge links 2 vertices of the same color
-
-        BLACK = "BLACK"
-        WHITE = "WHITE"
-
-        bipartite = True
-        color = {vertex: None for vertex in self.graph}
-
-        def complement(c):
-            if c == BLACK:
-                return WHITE
-            if c == WHITE:
-                return BLACK
-
-        def process_edge(v, y):
-            nonlocal bipartite
-            if color[v] == color[y]:
-                bipartite = False
-                print(f"Warning: not bipartite due to edge ({v}, {y})")
-            color[y] = complement(color[v])
-
-        for vertex in self.graph:
-            if color[vertex] is None:
-                color[vertex] = WHITE
-                self.bfs(vertex, process_edge=process_edge)
-
-        return bipartite
-
 
 # Usage:
 def main():
@@ -162,21 +87,6 @@ def main():
         process_vertex_early=lambda v: print(f"Processed vertex early: {v}"),
         process_edge=lambda v, y: print(f"Processed edge ({v} -> {y})"),
     )
-    print()
-
-    print(f"Number of edges: {g.count_edges()}\n")
-
-    print(f"Shortest path from 1 to 4: {g.find_shortest_path(1, 4)}\n")
-
-    print(f"...Connected components...")
-    g.connected_components()
-    print()
-
-    is_bipartite = g.two_color()
-    if is_bipartite:
-        print("Graph is bipartite")
-    else:
-        print("Graph is not bipartite")
 
 
 if __name__ == "__main__":
