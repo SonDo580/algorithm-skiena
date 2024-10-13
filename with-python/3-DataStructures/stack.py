@@ -1,25 +1,31 @@
 class Stack:
     def __init__(self):
-        self.stack = []
+        self.items = []
 
     def push(self, x):
-        self.stack.append(x)
+        self.items.append(x)
 
     def peek(self):
         if self.is_empty():
             raise IndexError("Stack is empty")
-        return self.stack[-1]
+        return self.items[-1]
+    
+    # a trick for faster peek() of a queue (see queue.py)
+    def bottom(self):
+        if self.is_empty():
+            raise IndexError("Stack is empty")
+        return self.items[0]
 
     def pop(self):
         if self.is_empty():
             raise IndexError("Stack is empty")
-        return self.stack.pop()
+        return self.items.pop()
     
     def is_empty(self):
-        return len(self.stack) == 0
+        return len(self.items) == 0
     
     def size(self):
-        return len(self.stack)
+        return len(self.items)
 
 # Usage
 def main():
