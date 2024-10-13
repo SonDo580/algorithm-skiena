@@ -8,11 +8,7 @@ class Graph:
         self.graph = {}
         self._directed = directed
 
-    def add_edge(
-        self,
-        u,
-        v,
-    ):
+    def add_edge(self, u, v):
         if u not in self.graph:
             self.graph[u] = set()
         self.graph[u].add(v)
@@ -29,9 +25,9 @@ class Graph:
     def bfs(
         self,
         start,
-        process_vertex_early,
-        process_vertex_late,
-        process_edge,
+        process_vertex_early=None,
+        process_vertex_late=None,
+        process_edge=None,
     ):
         # discovered: vertex found
         discovered = {vertex: False for vertex in self.graph}
@@ -47,35 +43,35 @@ class Graph:
 
         while queue:
             v = queue.popleft()
-            process_vertex_early(v)
+            if process_vertex_early:
+                process_vertex_early(v)
             processed[v] = True
 
             neighbors = self.graph.get(v, [])
             for y in neighbors:
                 if not processed[y] or self._directed:
-                    process_edge(v, y)
+                    if process_edge:
+                        process_edge(v, y)
 
                 if not discovered[y]:
                     queue.append(y)
                     discovered[y] = True
                     parent[y] = v
 
-            process_vertex_late(v)
-
-
-def process_vertex_early(v):
-    print(f"Processed vertex early: {v}")
-
-
-def process_edge(v, y):
-    print(f"Processed edge ({v} -> {y})")
-
-
-def process_vertex_late(v):
-    return  # do nothing
+            if process_vertex_late:
+                process_vertex_late(v)
 
 
 # Usage:
+def count_edges(graph):
+    edge_count = {"count": 0}
+
+    def count_edges(v, y):
+        edge_count["count"] += 1
+
+    graph.bfs(start=1, process_edge=count_edges)
+    return edge_count['count']
+                
 def main():
     g = Graph()
     g.add_edge(1, 2)
@@ -88,11 +84,12 @@ def main():
     print("...Starting BFS...")
     g.bfs(
         start=1,
-        process_vertex_early=process_vertex_early,
-        process_edge=process_edge,
-        process_vertex_late=process_vertex_late,
+        process_vertex_early=lambda v: print(f"Processed vertex early: {v}"),
+        process_edge=lambda v, y: print(f"Processed edge ({v} -> {y})"),
     )
     print("...End BFS...")
+
+    print(f"Number of edges: {count_edges(g)}")
 
 
 if __name__ == "__main__":
