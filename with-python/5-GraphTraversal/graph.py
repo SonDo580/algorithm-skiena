@@ -110,6 +110,36 @@ class Graph:
 
         return components
 
+    def two_color(self):
+        # a graph is bipartite if it can be colored using only 2 colors
+        # such that no edge links 2 vertices of the same color
+
+        BLACK = "BLACK"
+        WHITE = "WHITE"
+
+        bipartite = True
+        color = {vertex: None for vertex in self.graph}
+
+        def complement(c):
+            if c == BLACK:
+                return WHITE
+            if c == WHITE:
+                return BLACK
+
+        def process_edge(v, y):
+            nonlocal bipartite
+            if color[v] == color[y]:
+                bipartite = False
+                print(f"Warning: not bipartite due to edge ({v}, {y})")
+            color[y] = complement(color[v])
+
+        for vertex in self.graph:
+            if color[vertex] is None:
+                color[vertex] = WHITE
+                self.bfs(vertex, process_edge=process_edge)
+
+        return bipartite
+
 
 # Usage:
 def main():
@@ -120,6 +150,11 @@ def main():
     g.add_edge(3, 4)
     g.add_edge(4, 5)
     g.print()
+
+    # Diagram:
+    # 1 - 2 - 4 - 5
+    # |       |
+    # 3-------'
 
     print("\n...Starting BFS...")
     g.bfs(
@@ -136,6 +171,13 @@ def main():
     print(f"...Connected components...")
     g.connected_components()
     print()
+
+    is_bipartite = g.two_color()
+    if is_bipartite:
+        print("Graph is bipartite")
+    else:
+        print("Graph is not bipartite")
+
 
 if __name__ == "__main__":
     main()
