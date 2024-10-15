@@ -12,7 +12,8 @@ def is_jolly_jumper(nums):
     for i in range(n - 1):
         diff = abs(nums[i + 1] - nums[i])
         
-        if diff == 0 or diff > n - 1:
+        # check out of range and duplication 
+        if diff == 0 or diff > n - 1 or diffs[diff]:
             return False
         
         diffs[diff] = True
